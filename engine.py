@@ -1,4 +1,6 @@
-
+"""
+Stores all information about the state of the current game
+"""
 
 class GameState:
     
@@ -10,6 +12,7 @@ class GameState:
                      ["--","--","--","--","--","--","--","--"],
                      ["--","--","--","--","--","--","--","--"],
                      ["wP","wP","wP","wP","wP","wP","wP","wP"],
-                     ["bR","bN","bB","bQ","bK","bB","bN","bR"]]
+                     ["wR","wN","wB","wQ","wK","wB","wN","wR"]]
 
         self.WhiteToMove = True
+        self.move_log = []
