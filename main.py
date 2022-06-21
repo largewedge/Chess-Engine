@@ -11,7 +11,7 @@ import engine
 WIDTH = HEIGHT = 512
 DIMENSION = 8
 SQ_SIZE = HEIGHT // DIMENSION
-MAX_FPS = 15
+MAX_FPS = 60
 IMAGES = {}
 
 
@@ -38,10 +38,34 @@ def main():
     load_images()
     running = True
 
+    square_selected = () #no square selected initially. tuple: (row,col)
+    player_clicks = []  #array of two clicks
+
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
-                running = false
+                running = False
+
+            elif e.type == p.MOUSEBUTTONDOWN:
+                #returns mouse coordinates (x,y)
+                location = p.mouse.get_pos()
+                col = location[0]//SQ_SIZE
+                row = location[1]//SQ_SIZE
+
+                if square_selected == (row,col): #deselect square
+                    square_selected = ()
+                    player_clicks = []
+                else:
+                    square_selected = (row,col)
+                    player_clicks.append(square_selected)
+
+                if len(player_clicks) == 2:
+                    move = engine.move(player_clicks[0],player_clicks[1],gs.board)
+                    print(move.get_chess_notation())
+                    gs.make_move(move)
+                    square_selected = ()
+                    player_clicks = []
+
 
             draw_game_state(screen,gs)
             clock.tick(MAX_FPS)
