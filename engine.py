@@ -1,3 +1,5 @@
+import numpy as np
+
 """
 Stores all information about the state of the current game
 """
@@ -14,16 +16,61 @@ class GameState:
                      ["wP","wP","wP","wP","wP","wP","wP","wP"],
                      ["wR","wN","wB","wQ","wK","wB","wN","wR"]]
 
+        self.absolute_pins = [[0,0,0,0,0,0,0,0],
+                             [0,0,0,0,0,0,0,0],
+                             [0,0,0,0,0,0,0,0], 
+                             [0,0,0,0,0,0,0,0],
+                             [0,0,0,0,0,0,0,0],
+                             [0,0,0,0,0,0,0,0],
+                             [0,0,0,0,0,0,0,0],
+                             [0,0,0,0,0,0,0,0]]
+
         self.WhiteToMove = True
+        self.WKingMoved = False
+        self.WKSquare = (7,4)
+        self.BKingMoved = False
+        self.BKSquare = (0,4)
         self.move_log = []
 
     def make_move(self,move):
-        self.board[move.start_row][move.start_col] = "--"
-        self.board[move.end_row][move.end_col] = move.piece_moved
-        self.move_log.append(move)
-        self.WhiteToMove = not self.WhiteToMove
+        #don't allow player to put themselves in check
+        if self.absolute_pins[move.start_row][move.start_col] == 1:
+            pass
+        else:
+            self.board[move.start_row][move.start_col] = "--"
+            self.board[move.end_row][move.end_col] = move.piece_moved
+            self.move_log.append(move)
+            if move.piece_moved == "wK":
+                self.WKingMoved = True
+                self.WKSquare = (move.end_row,move.end_col)
+            if move.piece_moved == "bK":
+                self.BKingMoved = True
+                self.BKSquare = (move.end_row,move.end_col)
+
+            self.WhiteToMove = not self.WhiteToMove
+            self.find_abs_pins()
 
 
+    def undo(self):
+        if len(self.move_log) == 0:
+            print("No moves to undo!")
+            pass
+        else:
+            last_move = self.move_log[-1]
+            '''
+            Replace captured piece and put piece moved back on its initial square
+            '''
+            self.board[last_move.end_row][last_move.end_col] = last_move.piece_captured
+            self.board[last_move.start_row][last_move.start_col] = last_move.piece_moved
+            self.move_log.pop() #remove last move
+
+    def find_abs_pins(self):
+        pass
+        board_array = np.array(self.board)
+
+
+
+#generate candidate move
 class move:
     '''
     mapping between indices and ranks/files

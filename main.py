@@ -5,13 +5,13 @@ Driver. Handles user input and graphics
 
 import pygame as p
 import engine
-
+import numpy as np
 
 #board dimensions
 WIDTH = HEIGHT = 512
 DIMENSION = 8
 SQ_SIZE = HEIGHT // DIMENSION
-MAX_FPS = 60
+MAX_FPS = 90
 IMAGES = {}
 
 
@@ -57,6 +57,12 @@ def main():
                     player_clicks = []
                 else:
                     square_selected = (row,col)
+                    if len(player_clicks) == 1: #don't allow player to move 'empty piece' to other squares
+                        first_row = player_clicks[0][0]
+                        first_col = player_clicks[0][1]
+                        if gs.board[first_row][first_col] == "--":
+                            player_clicks.pop()
+
                     player_clicks.append(square_selected)
 
                 if len(player_clicks) == 2:
@@ -65,9 +71,11 @@ def main():
                     gs.make_move(move)
                     square_selected = ()
                     player_clicks = []
+            elif e.type == p.KEYDOWN:
+                if p.K_z:
+                    gs.undo()
 
-
-            draw_game_state(screen,gs)
+            draw_game_state(screen,gs,square_selected)
             clock.tick(MAX_FPS)
             p.display.flip()
 
@@ -75,21 +83,25 @@ def main():
 Graphics
 '''
 
-def draw_game_state(screen,gs):
-    draw_board(screen)
+def draw_game_state(screen,gs,square_selected):
+    draw_board(screen,square_selected)
     draw_pieces(screen,gs.board)
 
 '''
 draw the squares
 '''
-def draw_board(screen):
+def draw_board(screen,square_selected):
     colors = [p.Color("white"),p.Color("gray")]
+    selection_color = "red"
 
     for r in range(DIMENSION):
         for c in range(DIMENSION):
             #for light squares, row + col is always even
-            color = colors[((r+c)%2)]
-            p.draw.rect(screen,color,p.Rect(c*SQ_SIZE,r*SQ_SIZE,SQ_SIZE,SQ_SIZE))
+            if (r,c) == square_selected:
+                p.draw.rect(screen,selection_color,p.Rect(c*SQ_SIZE,r*SQ_SIZE,SQ_SIZE,SQ_SIZE))
+            else:
+                color = colors[((r+c)%2)]
+                p.draw.rect(screen,color,p.Rect(c*SQ_SIZE,r*SQ_SIZE,SQ_SIZE,SQ_SIZE))
 
 '''
 Draw pieces using current gamestate
